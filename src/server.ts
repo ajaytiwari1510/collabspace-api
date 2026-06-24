@@ -8,6 +8,7 @@ import { logger } from "@/config/logger";
 import { requestId } from "@/middleware/requestId.middleware";
 import { errorHandler } from "@/middleware/errorHandler.middleware";
 import { healthRouter } from "@/modules/health/health.routes";
+import { authRouter } from "@/modules/auth/auth.routes";
 
 /**
  * Express application factory.
@@ -47,6 +48,7 @@ export function createApp(): Application {
   // health.routes.ts. All future feature routers (auth, profiles,
   // projects, etc.) mount here under /api/v1 as each module is built.
   app.use(healthRouter);
+  app.use(authRouter);
 
   // ── 404 handler ─────────────────────────────────────────────────────
   app.use((req, res) => {
