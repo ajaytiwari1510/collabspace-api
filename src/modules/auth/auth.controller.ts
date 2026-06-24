@@ -8,7 +8,7 @@ const COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "strict" as const,
-  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 
 export const authController = {
@@ -22,12 +22,9 @@ export const authController = {
         })),
       });
     }
-
     const { name, email, password } = body.data;
     const result = await authService.register(name, email, password);
-
     res.cookie("refreshToken", result.refreshToken, COOKIE_OPTIONS);
-
     sendSuccess(res, { user: result.user, accessToken: result.accessToken }, { statusCode: 201 });
   },
 
@@ -41,12 +38,9 @@ export const authController = {
         })),
       });
     }
-
     const { email, password } = body.data;
     const result = await authService.login(email, password);
-
     res.cookie("refreshToken", result.refreshToken, COOKIE_OPTIONS);
-
     sendSuccess(res, { user: result.user, accessToken: result.accessToken });
   },
 
@@ -55,11 +49,8 @@ export const authController = {
     if (!token) {
       throw new AppError(401, "REFRESH_TOKEN_MISSING", "No refresh token provided.");
     }
-
     const result = await authService.refresh(token);
-
     res.cookie("refreshToken", result.refreshToken, COOKIE_OPTIONS);
-
     sendSuccess(res, { accessToken: result.accessToken });
   },
 
@@ -70,5 +61,9 @@ export const authController = {
     }
     res.clearCookie("refreshToken");
     sendSuccess(res, {});
+  },
+
+  async me(req: Request, res: Response) {
+    sendSuccess(res, { user: req.user });
   },
 };
