@@ -27,3 +27,4 @@ coverage/
 
 # tsc incremental build info
 *.tsbuildinfo
+*.pem
