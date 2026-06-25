@@ -1,21 +1,35 @@
 import { prisma } from "../../config/database";
 
 export class ProfileRepository {
-  /**
-   * Fetches a user and their associated profile by the User ID.
-   */
   async findProfileByUserId(userId: string) {
     return await prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
+      where: { id: userId },
       select: {
         id: true,
         name: true,
         email: true,
-        // This tells Prisma to JOIN the profile table and return that data too
-        profile: true, 
+        profile: true,
       },
+    });
+  }
+
+  async updateProfileByUserId(userId: string, data: {
+    displayName?: string;
+    headline?: string;
+    bio?: string;
+    college?: string;
+    degree?: string;
+    yearOfStudy?: number;
+    githubUrl?: string;
+    linkedinUrl?: string;
+    websiteUrl?: string;
+    availability?: string;
+    skills?: string[];
+    profileComplete?: boolean;
+  }) {
+    return await prisma.profile.update({
+      where: { userId },
+      data,
     });
   }
 }

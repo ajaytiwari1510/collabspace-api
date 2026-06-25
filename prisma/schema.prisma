@@ -55,6 +55,7 @@ model Profile {
   githubUrl       String?
   linkedinUrl     String?
   websiteUrl      String?
+  skills         String[]  @default([])
   availability    String    @default("open")
   profileScore    Int       @default(0)
   profileComplete Boolean   @default(false)
