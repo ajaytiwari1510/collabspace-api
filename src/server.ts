@@ -10,16 +10,16 @@ import { errorHandler } from "@/middleware/errorHandler.middleware";
 import { healthRouter } from "@/modules/health/health.routes";
 import { authRouter } from "@/modules/auth/auth.routes";
 
+// 1. ADDED: Import the new profile router
+import profileRouter from "@/modules/profile/profile.routes"; 
+
 /**
  * Express application factory.
  *
  * Per Architecture Document Section 1.2 (Request Lifecycle) and
  * Section 6.2 (API Security Layers). Middleware order matters:
- *   requestId -> security headers -> CORS -> body parsing -> logging
- *   -> routes -> 404 handler -> global error handler (always last)
- *
- * No business feature routes are mounted yet — modules/ is empty
- * except for health, per this setup's explicit scope.
+ * requestId -> security headers -> CORS -> body parsing -> logging
+ * -> routes -> 404 handler -> global error handler (always last)
  */
 export function createApp(): Application {
   const app = express();
@@ -30,8 +30,15 @@ export function createApp(): Application {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.CORS_ORIGIN,
-      credentials: true, // required for the refresh_token HttpOnly cookie
+      origin: (origin, callback) => {
+        const allowed = env.CORS_ORIGIN.split(',').map(o => o.trim());
+        if (!origin || allowed.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS: origin ${origin} not allowed`));
+        }
+      },
+      credentials: true,
     }),
   );
   app.use(express.json({ limit: "1mb" }));
@@ -44,11 +51,11 @@ export function createApp(): Application {
   );
 
   // ── Routes ──────────────────────────────────────────────────────────
-  // Health checks are infrastructure, not a business feature — see
-  // health.routes.ts. All future feature routers (auth, profiles,
-  // projects, etc.) mount here under /api/v1 as each module is built.
   app.use(healthRouter);
   app.use(authRouter);
+  
+  // 2. ADDED: Mount the profile router to the /api/v1/profile path
+  app.use("/api/v1/profile", profileRouter);
 
   // ── 404 handler ─────────────────────────────────────────────────────
   app.use((req, res) => {
